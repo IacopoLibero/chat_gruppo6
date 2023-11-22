@@ -48,5 +48,10 @@
   - d : disconnessione
 
 **Messaggio server**
+  - c : un solo client collegato
+  - i : inserisci nome
+  - e : errore   
   - a : notifica connesione nuovo client
+  - o : opzioni
   - d : notifica disconnesione client 
+  

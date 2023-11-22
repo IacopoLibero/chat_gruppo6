@@ -13,11 +13,12 @@ public class App
         {
             System.out.println("Server in avvio!");
             ServerSocket server = new ServerSocket(4567); //crea socket su cui ricevere
-            ArrayList clients=new ArrayList<MioThreadServer>();
+            ArrayList <MioThreadServer> clients=new ArrayList<MioThreadServer>();
             do 
             {
                 Socket s = server.accept(); //accetta connessione
                 MioThreadServer m = new MioThreadServer(s,clients); //crea thread
+                
                 clients.add(m);
                 m.start(); //start processo
 

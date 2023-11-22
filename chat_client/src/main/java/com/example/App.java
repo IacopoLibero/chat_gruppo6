@@ -15,8 +15,10 @@ public class App
             
             Socket socket = new Socket("localhost", 4567); //creo il socket e lo connetto al server
             Invia cout=new Invia(socket);
-            //crea ricevi
+            Ricevi cin=new Ricevi(socket);
+            cin.start();
             cout.start();
+            
             
         } 
         catch (Exception e)
