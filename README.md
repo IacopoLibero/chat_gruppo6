@@ -35,6 +35,10 @@
     
 *funzioni*
   - run()
+  - broadcast (String nameT, String message)
+  - onlyone (String message, String nome)
+  - collegamento (String nome)
+  - isName (String nome)
 
 
 **Diagramma della Classi client**
@@ -51,7 +55,8 @@
   - c : un solo client collegato
   - i : inserisci nome
   - e : errore   
-  - a : notifica connesione nuovo client
+  - @ : notifica connesione nuovo client
   - o : opzioni
   - d : notifica disconnesione client 
+  - & : invio messaggio da altri client
   

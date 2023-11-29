@@ -57,12 +57,16 @@ public class MioThreadServer extends Thread
                 {
                     case "1":
                     {
-
+                        String nome =input.readLine();
+                        String mess = input.readLine();
+                        onlyone(mess,nome);
                     }
                     break;
                     case "2":
                     {
-
+                        String nome =input.readLine();
+                        String mess = input.readLine();
+                        broadcast(nome, mess);
                     }
                     break;
                     case "d":
@@ -94,7 +98,9 @@ public class MioThreadServer extends Thread
             {
                 Socket clientSocket = (Socket) client;
                 DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
-                clientOutput.writeBytes(nameT + " ti ha scitto: " +message + "\n");
+                clientOutput.writeBytes( "&\n");
+                clientOutput.writeBytes( nameT+"\n");
+                clientOutput.writeBytes( message+"\n");
             } 
             catch (Exception e) 
             {
@@ -104,7 +110,7 @@ public class MioThreadServer extends Thread
     }
 
 
-    public void onlyone(String nameT, String message,String nome) 
+    public void onlyone(String message,String nome) 
     {
         try 
         {
@@ -114,8 +120,9 @@ public class MioThreadServer extends Thread
                 {
                     Socket clientSocket = (Socket) cl.get(i).s;
                     DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
-                    clientOutput.writeBytes("&");
-                    clientOutput.writeBytes(nameT + " ti ha scitto: " + message + "\n");
+                    clientOutput.writeBytes( "&\n");
+                    clientOutput.writeBytes( nome+"\n");
+                    clientOutput.writeBytes( message+"\n");
                 }
             }
             
@@ -126,7 +133,7 @@ public class MioThreadServer extends Thread
         }
     }
 
-    public void collegamento(String message)
+    public void collegamento(String nome)
     {
         for (Object client : cl) 
         {
@@ -134,7 +141,8 @@ public class MioThreadServer extends Thread
             {
                 Socket clientSocket = (Socket) client;
                 DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
-                clientOutput.writeBytes("@"+message+"si è collegato"+ "\n");
+                clientOutput.writeBytes( "@\n");
+                clientOutput.writeBytes( nome+"\n");
             } 
             catch (Exception e) 
             {
