@@ -45,7 +45,7 @@ public class MioThreadServer extends Thread
                 }
                 else
                 {
-                    output.writeBytes("e\n"); //refused
+                    output.writeBytes("en\n"); //refused
                 }
             }while(true);
 
@@ -71,6 +71,8 @@ public class MioThreadServer extends Thread
                     break;
                     case "d":
                     {
+                        String nome=input.readLine();
+                        broadcast(nome, "d\n");
                         output.writeBytes("d\n");
                     }
                     default:

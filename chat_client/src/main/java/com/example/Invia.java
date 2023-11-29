@@ -11,22 +11,26 @@ import java.util.Scanner;
 public class Invia extends Thread
 {
     Socket socket;
+    String mess;
 
-    public Invia(Socket s)
+    public Invia(Socket s, String mess)
     {
         this.socket = s;
+        this.mess = mess;
     }
+    
 
     public void run()
     {
+        send(mess);
+    }
+
+    public void send(String mess)
+    {
         try 
         { 
-            Scanner input = new Scanner(System.in); //creo scanner
-            
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());//creo bufferedreader che invia al server
-            out.writeBytes(getName()+'\n');
-            
-            input.close(); //chiudo scanner
+            out.writeBytes(mess+'\n');
         } 
         catch (Exception e)
         {
@@ -34,5 +38,6 @@ public class Invia extends Thread
             System.out.println("errore durante l'istanza del server");
             System.exit(1);
         }
+        this.interrupt();
     }
 }
