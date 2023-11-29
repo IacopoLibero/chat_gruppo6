@@ -25,9 +25,10 @@ public class MioThreadServer extends Thread
         {
             BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream())); //istanza per ricevere dati dal client
             DataOutputStream output = new DataOutputStream(s.getOutputStream()); //istanza per inviare dati al client
-            while (cl.size()>=2) 
+            while (cl.size()<=2) 
             {
                 output.writeBytes("c\n");
+                System.out.println("1");
                 this.wait(5000);
             }  
             do
