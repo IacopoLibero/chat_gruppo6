@@ -22,11 +22,10 @@ public class Ricevi extends Thread
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())); //creo bufferedreader che riceve dal server
             while(!exit)
             {
-                do
+                while(in.readLine().equals("c"))
                 {
                     System.out.println("\nnon ci sono abbastanza client connessi, aspetta");
                 }
-                while(in.readLine().equals("c"));
 
                 do
                 {
