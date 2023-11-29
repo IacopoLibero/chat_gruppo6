@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class MioThreadServer extends Thread
 {
@@ -73,7 +72,9 @@ public class MioThreadServer extends Thread
                     {
                         String nome=input.readLine();
                         broadcast(nome, "d\n");
+                        elimina(nome);
                         output.writeBytes("d\n");
+
                     }
                     default:
                     {
@@ -165,5 +166,18 @@ public class MioThreadServer extends Thread
             }
         }
         return false;
+    }
+
+    public void elimina(String nomeThread) 
+    {
+        for (int i = 0; i < cl.size(); i++) {
+
+            MioThreadServer thread = cl.get(i);
+            if (thread.getName().equals(nomeThread)) 
+            {
+                cl.remove(i);
+                break;
+            }
+        }
     }
 }

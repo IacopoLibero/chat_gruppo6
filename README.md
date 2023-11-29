@@ -19,19 +19,18 @@
 
 **Diagramma delle Classi server**
 <br>
+
 **App**
   - server : ServerSocket  
-  - socket : Socket 
-  - thread : MioThread
-  - clients :   ArrayList
-
-*funzioni*
-  - Invio singolo (mittente, destinatario)
-  - Invio in broadcast (Mittente)
+  - s : Socket 
+  - m : MioThreadServer
+  - clients :   ArrayList<'MioThreadServer'>
 
 **MioThread**
   - input : BufferedReader
   - output : DataOutputStream
+  - s : socket
+  - cl : ArrayList<'MioThreadServer'>
     
 *funzioni*
   - run()
@@ -39,10 +38,37 @@
   - onlyone (String message, String nome)
   - collegamento (String nome)
   - isName (String nome)
+  - elimina (String nomeThread)
 
 
 **Diagramma della Classi client**
-// da fare
+<br>
+
+**App**
+  - socket : Socket 
+  - cin : Ricevi
+
+**Invia**
+  - out : DataOutputStream
+  - socket : Socket
+  - mess : String
+    
+*funzioni*
+  - run()
+  - send(String mess)
+
+**Ricevi**
+  - input : Scanner
+  - socket : Socket
+  - exit : boolean
+  - in : BufferedReader
+  - cout : Invia
+    
+*funzioni*
+  - run()
+  - stopThread()
+  - send()
+  - send(String x)
 
 
 
