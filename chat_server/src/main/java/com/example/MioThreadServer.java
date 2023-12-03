@@ -16,26 +16,25 @@ public class MioThreadServer extends Thread
     {
         this.s = s;
         this.cl=cl;
-        
     }
 
     public void run()
     {
-        try 
+        try
         {
             BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream())); //istanza per ricevere dati dal client
             DataOutputStream output = new DataOutputStream(s.getOutputStream()); //istanza per inviare dati al client
-            while (cl.size()<=2) 
-            {
-                output.writeBytes("c\n");
-                System.out.println("1");
-                this.wait(5000);
-            }  
+            // while (cl.size()<=2)
+            // {
+            //     output.writeBytes("c\n");
+            //     System.out.println("1");
+            //     this.wait(5000);
+            // }
             do
             {
                 output.writeBytes("i\n"); //inserisci nome
                 String nome = input.readLine(); //riceve dati
-                
+
                 if(isName(nome) == false)
                 {
                     cl.get(cl.size()-1).setName(nome);
@@ -49,11 +48,13 @@ public class MioThreadServer extends Thread
                 }
             }while(true);
 
+            String action;
             do
             {
                 output.writeBytes("o\n");
-            
-                switch (input.readLine()) 
+                action = input.readLine();
+
+                switch (action)
                 {
                     case "1":
                     {
@@ -71,6 +72,7 @@ public class MioThreadServer extends Thread
                     break;
                     case "d":
                     {
+                        System.out.println("Disconnessione");
                         String nome=input.readLine();
                         broadcast(nome, "d\n");
                         elimina(nome);
@@ -83,30 +85,32 @@ public class MioThreadServer extends Thread
                     }
                     break;
                 }
-            }while (!input.readLine().equals("d"));
+            }while (!action.equals("d"));
 
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             System.out.println(e.getMessage());
             System.out.println("errore durante l'istanza del server");
             System.exit(1);
         }
     }
-    
-    public void broadcast(String nameT, String message) 
+
+    public void broadcast(String nameT, String message)
     {
-        for (Object client : cl) 
+        //Eccomi nel broadcast
+        for (MioThreadServer client : cl)
         {
-            try 
+            try
             {
-                Socket clientSocket = (Socket) client;
+                Socket clientSocket = (Socket) client.s;
                 DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
                 clientOutput.writeBytes( "&\n");
                 clientOutput.writeBytes( nameT+"\n");
                 clientOutput.writeBytes( message+"\n");
-            } 
-            catch (Exception e) 
+                clientSocket.close();
+            }
+            catch (Exception e)
             {
                 System.out.println("Errore durante l'invio del messaggio al client");
             }
@@ -114,11 +118,11 @@ public class MioThreadServer extends Thread
     }
 
 
-    public void onlyone(String message,String nome) 
+    public void onlyone(String message,String nome)
     {
-        try 
+        try
         {
-            for (int i = 0; i < cl.size(); i++) 
+            for (int i = 0; i < cl.size(); i++)
             {
                 if(cl.get(i).getName().equals(nome))
                 {
@@ -129,9 +133,9 @@ public class MioThreadServer extends Thread
                     clientOutput.writeBytes( message+"\n");
                 }
             }
-            
-        } 
-        catch (Exception e) 
+
+        }
+        catch (Exception e)
         {
             System.out.println("Errore durante l'invio del messaggio al client");
         }
@@ -139,42 +143,56 @@ public class MioThreadServer extends Thread
 
     public void collegamento(String nome)
     {
-        for (Object client : cl) 
+        for (MioThreadServer client : cl)
         {
-            try 
+            try
             {
-                Socket clientSocket = (Socket) client;
+                Socket clientSocket = (Socket) client.s;
                 DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
                 clientOutput.writeBytes( "@\n");
                 clientOutput.writeBytes( nome+"\n");
-            } 
-            catch (Exception e) 
+                clientOutput.writeBytes("c\n");
+                clientOutput.writeBytes(stampaContatti() + "\n");
+            }
+            catch (Exception e)
             {
                 System.out.println("Errore durante l'invio del messaggio al client");
             }
         }
     }
 
-    public boolean isName(String nome) 
+    public boolean isName(String nome)
     {
         boolean is = false;
-        for (int i = 0; i < cl.size(); i++) 
+        for (int i = 0; i < cl.size(); i++)
         {
             //se è presente un nome uguale
             if(cl.get(i).getName().equals(nome))
-            {   
+            {
                 return true;
             }
         }
         return false;
     }
 
-    public void elimina(String nomeThread) 
+    public String stampaContatti(){
+        String contatti = "";
+        for (int i = 0; i < cl.size(); i++) {
+            contatti += cl.get(i).getName();
+            if(i < cl.size() - 1){
+                contatti += ",";
+            }
+        }
+
+        return contatti;
+    }
+
+    public void elimina(String nomeThread)
     {
         for (int i = 0; i < cl.size(); i++) {
 
             MioThreadServer thread = cl.get(i);
-            if (thread.getName().equals(nomeThread)) 
+            if (thread.getName().equals(nomeThread))
             {
                 cl.remove(i);
                 break;

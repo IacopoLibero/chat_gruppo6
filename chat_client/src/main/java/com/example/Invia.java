@@ -13,7 +13,6 @@ public class Invia extends Thread
         this.socket = s;
         this.mess = mess;
     }
-    
 
     public void run()
     {
@@ -22,11 +21,11 @@ public class Invia extends Thread
 
     public void send(String mess)
     {
-        try 
-        { 
+        try
+        {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());//creo bufferedreader che invia al server
             out.writeBytes(mess+'\n');
-        } 
+        }
         catch (Exception e)
         {
             System.out.println(e.getMessage());
