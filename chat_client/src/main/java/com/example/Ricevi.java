@@ -72,6 +72,13 @@ public class Ricevi extends Thread
                             System.out.println("\n@"+in.readLine()+" si è disconnesso");
                         }
                         break;
+                        case "&":
+                        {
+                            String nome = in.readLine();
+                            String message = in.readLine();
+
+                            System.out.println("@" + nome + " ha scritto: " + message);
+                        }
                         case "o":
                         {
                             String selezione;

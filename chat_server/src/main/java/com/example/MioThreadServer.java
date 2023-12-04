@@ -98,7 +98,6 @@ public class MioThreadServer extends Thread
 
     public void broadcast(String nameT, String message)
     {
-        //Eccomi nel broadcast
         for (MioThreadServer client : cl)
         {
             try
@@ -108,7 +107,7 @@ public class MioThreadServer extends Thread
                 clientOutput.writeBytes( "&\n");
                 clientOutput.writeBytes( nameT+"\n");
                 clientOutput.writeBytes( message+"\n");
-                clientSocket.close();
+                // clientSocket.close();
             }
             catch (Exception e)
             {
@@ -163,7 +162,6 @@ public class MioThreadServer extends Thread
 
     public boolean isName(String nome)
     {
-        boolean is = false;
         for (int i = 0; i < cl.size(); i++)
         {
             //se è presente un nome uguale
@@ -178,9 +176,11 @@ public class MioThreadServer extends Thread
     public String stampaContatti(){
         String contatti = "";
         for (int i = 0; i < cl.size(); i++) {
-            contatti += cl.get(i).getName();
-            if(i < cl.size() - 1){
-                contatti += ",";
+            if(!this.getName().equals(cl.get(i).getName())){
+                contatti += cl.get(i).getName();
+                if(i < cl.size() - 1){
+                    contatti += ",";
+                }
             }
         }
 
