@@ -86,6 +86,7 @@ public class Ricevi extends Thread
                                 System.out.println("\ncosa vuoi fare?");
                                 System.out.println("\n1-invia a un solo utente\n2-invia a tutti gli utenti\nd-disconnessione");
                                 selezione = input.nextLine();
+                                System.out.println("Azione: " + selezione);
                                 // send(selezione);
 
                                 switch (selezione)
@@ -96,6 +97,8 @@ public class Ricevi extends Thread
                                         String nome=input.nextLine();
                                         System.out.println("\ninserisci messaggio: ");
                                         String mess=input.nextLine();
+                                        System.out.println("Nome: " + nome);
+                                        System.out.println("Messaggio: " + mess);
                                         send(mess);
                                         send(nome);
                                     }
@@ -106,6 +109,7 @@ public class Ricevi extends Thread
                                         String nome=input.nextLine();
                                         System.out.println("\ninserisci messaggio: ");
                                         String mess=input.nextLine();
+                                        send("&");
                                         send(nome);
                                         send(mess);
                                     }

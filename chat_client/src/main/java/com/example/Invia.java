@@ -25,6 +25,7 @@ public class Invia extends Thread
         {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());//creo bufferedreader che invia al server
             out.writeBytes(mess+'\n');
+            System.out.println("Messaggio " + mess);
         }
         catch (Exception e)
         {

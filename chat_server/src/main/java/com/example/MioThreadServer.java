@@ -53,6 +53,7 @@ public class MioThreadServer extends Thread
             {
                 output.writeBytes("o\n");
                 action = input.readLine();
+                System.out.println("Azione: " + action);
 
                 switch (action)
                 {
