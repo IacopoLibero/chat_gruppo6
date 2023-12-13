@@ -2,200 +2,148 @@ package com.example;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class MioThreadServer extends Thread
-{
+/**
+ * Questa classe rappresenta un thread del server di chat.
+ * Ogni istanza di questa classe gestisce la comunicazione con un singolo client.
+ */
+public class MioThreadServer extends Thread {
 
     Socket s;
     ArrayList<MioThreadServer> cl;
 
-    public MioThreadServer(Socket s,ArrayList<MioThreadServer> cl)
-    {
+    /**
+     * Costruttore della classe MioThreadServer.
+     * @param s il socket associato al client
+     * @param cl la lista dei thread del server
+     */
+    public MioThreadServer(Socket s, ArrayList<MioThreadServer> cl) {
         this.s = s;
-        this.cl=cl;
+        this.cl = cl;
     }
 
-    public void run()
-    {
-        try
-        {
-            BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream())); //istanza per ricevere dati dal client
-            DataOutputStream output = new DataOutputStream(s.getOutputStream()); //istanza per inviare dati al client
-            // while (cl.size()<=2)
-            // {
-            //     output.writeBytes("c\n");
-            //     System.out.println("1");
-            //     this.wait(5000);
-            // }
-            do
-            {
-                output.writeBytes("i\n"); //inserisci nome
-                String nome = input.readLine(); //riceve dati
+    /**
+     * Metodo che viene eseguito quando il thread viene avviato.
+     * Gestisce la comunicazione con il client e le azioni richieste.
+     */
+    public void run() {
+        try {
+            BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream())); // istanza per ricevere dati dal client
+            DataOutputStream output = new DataOutputStream(s.getOutputStream()); // istanza per inviare dati al client
 
-                if(isName(nome) == false)
-                {
-                    cl.get(cl.size()-1).setName(nome);
-                    output.writeBytes("a\n"); //connessione effettuata
-                    collegamento(nome);
-                    break;
-                }
-                else
-                {
-                    output.writeBytes("en\n"); //refused
-                }
-            }while(true);
+            broadcast(1, " si e' collegato"); // invia un messaggio di connessione a tutti i client
 
             String action;
-            do
-            {
-                output.writeBytes("o\n");
-                action = input.readLine();
-                System.out.println("Azione: " + action);
 
-                switch (action)
-                {
+            do {
+                action = input.readLine(); // legge l'azione inviata dal client
+
+                switch (action) {
                     case "1":
-                    {
-                        String nome =input.readLine();
-                        String mess = input.readLine();
-                        onlyone(mess,nome);
-                    }
-                    break;
+                        String message = input.readLine(); // legge il messaggio inviato dal client
+                        broadcast(0, message); // invia il messaggio a tutti i client
+                        break;
                     case "2":
-                    {
-                        String nome =input.readLine();
-                        String mess = input.readLine();
-                        broadcast(nome, mess);
-                    }
-                    break;
+                        String[] sendMessage = input.readLine().split(":"); // legge il messaggio e il destinatario inviati dal client
+                        if (onlyOne(sendMessage[0], sendMessage[1]) == false) { // verifica se il destinatario esiste
+                            output.writeBytes("Il contatto non esiste\n"); // invia un messaggio di errore al client
+                        }
+                        break;
+                    case "l":
+                        output.writeBytes(printList() + "\n"); // invia la lista dei contatti al client
+                        break;
                     case "d":
-                    {
-                        System.out.println("Disconnessione");
-                        String nome=input.readLine();
-                        broadcast(nome, "d\n");
-                        elimina(nome);
-                        output.writeBytes("d\n");
-
-                    }
+                        output.writeBytes("Disconnessione\n"); // invia un messaggio di disconnessione al client
+                        removeClient(this.getName()); // rimuove il client dalla lista dei client
+                        this.s.close(); // chiude la connessione con il client
+                        break;
                     default:
-                    {
-                        output.writeBytes("e\n");
-                    }
-                    break;
+                        System.out.println("Azione non valida\n"); // stampa un messaggio di errore per un'azione non valida
+                        break;
                 }
-            }while (!action.equals("d"));
-
-        }
-        catch (Exception e)
-        {
-            System.out.println(e.getMessage());
-            System.out.println("errore durante l'istanza del server");
-            System.exit(1);
+            } while (this.s.isClosed() == false); // continua finché la connessione con il client è aperta
+        } catch (Exception e) {
+            System.out.println(e.getMessage()); // stampa l'eccezione in caso di errore
         }
     }
 
-    public void broadcast(String nameT, String message)
-    {
-        for (MioThreadServer client : cl)
-        {
-            try
-            {
-                Socket clientSocket = (Socket) client.s;
-                DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
-                clientOutput.writeBytes( "&\n");
-                clientOutput.writeBytes( nameT+"\n");
-                clientOutput.writeBytes( message+"\n");
-                // clientSocket.close();
-            }
-            catch (Exception e)
-            {
-                System.out.println("Errore durante l'invio del messaggio al client");
-            }
-        }
-    }
-
-
-    public void onlyone(String message,String nome)
-    {
-        try
-        {
-            for (int i = 0; i < cl.size(); i++)
-            {
-                if(cl.get(i).getName().equals(nome))
-                {
-                    Socket clientSocket = (Socket) cl.get(i).s;
-                    DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
-                    clientOutput.writeBytes( "&\n");
-                    clientOutput.writeBytes( nome+"\n");
-                    clientOutput.writeBytes( message+"\n");
+    /**
+     * Verifica se esiste un solo destinatario nella lista dei client e invia un messaggio privato a quel destinatario.
+     * @param name il nome del destinatario
+     * @param message il messaggio da inviare
+     * @return true se il destinatario esiste, false altrimenti
+     */
+    public boolean onlyOne(String name, String message) {
+        for (MioThreadServer client : cl) {
+            if (client.getName().equals(name)) { // verifica se il destinatario esiste nella lista dei client
+                try {
+                    DataOutputStream clientOutputStream = new DataOutputStream(client.s.getOutputStream());
+                    clientOutputStream.writeBytes(this.getName() + " (privato): " + message + "\n"); // invia un messaggio privato al destinatario
+                } catch (Exception e) {
+                    System.out.println(e.getMessage()); // stampa l'eccezione in caso di errore
                 }
-            }
-
-        }
-        catch (Exception e)
-        {
-            System.out.println("Errore durante l'invio del messaggio al client");
-        }
-    }
-
-    public void collegamento(String nome)
-    {
-        for (MioThreadServer client : cl)
-        {
-            try
-            {
-                Socket clientSocket = (Socket) client.s;
-                DataOutputStream clientOutput = new DataOutputStream(clientSocket.getOutputStream());
-                clientOutput.writeBytes( "@\n");
-                clientOutput.writeBytes( nome+"\n");
-                clientOutput.writeBytes("c\n");
-                clientOutput.writeBytes(stampaContatti() + "\n");
-            }
-            catch (Exception e)
-            {
-                System.out.println("Errore durante l'invio del messaggio al client");
-            }
-        }
-    }
-
-    public boolean isName(String nome)
-    {
-        for (int i = 0; i < cl.size(); i++)
-        {
-            //se è presente un nome uguale
-            if(cl.get(i).getName().equals(nome))
-            {
                 return true;
             }
         }
         return false;
     }
 
-    public String stampaContatti(){
-        String contatti = "";
-        for (int i = 0; i < cl.size(); i++) {
-            if(!this.getName().equals(cl.get(i).getName())){
-                contatti += cl.get(i).getName();
-                if(i < cl.size() - 1){
-                    contatti += ",";
+    /**
+     * Invia un messaggio a tutti i client tranne al mittente.
+     * @param num il numero identificativo del messaggio
+     * @param message il messaggio da inviare
+     */
+    public void broadcast(Integer num, String message) {
+        String send = "";
+        if (num == 0) {
+            send = "[" + this.getName() + "]" + " ha scritto: " + message; // formatta il messaggio per la trasmissione a tutti i client
+        } else {
+            send = "[" + this.getName() + "]" + message; // formatta il messaggio per la trasmissione a tutti i client
+        }
+        for (MioThreadServer client : cl) {
+            if (!client.s.equals(this.s)) { // verifica se il client corrente è diverso dal client a cui inviare il messaggio
+                try {
+                    DataOutputStream clientOutputStream = new DataOutputStream(client.s.getOutputStream());
+                    clientOutputStream.writeBytes(send + "\n"); // invia il messaggio a tutti i client tranne al mittente
+                } catch (IOException e) {
+                    e.printStackTrace(); // stampa l'eccezione in caso di errore
                 }
             }
         }
-
-        return contatti;
     }
 
-    public void elimina(String nomeThread)
-    {
-        for (int i = 0; i < cl.size(); i++) {
+    /**
+     * Restituisce la lista dei contatti registrati.
+     * @return la lista dei contatti registrati
+     */
+    public String printList() {
+        if (cl.size() == 1) {
+            return "Non ci sono contatti registrati"; // restituisce un messaggio se non ci sono contatti registrati
+        } else {
+            String contatti = "Ecco la lista dei contatti:\n[\n";
+            for (MioThreadServer client : cl) {
+                if (!client.getName().equals(this.getName())) {
+                    contatti += "   - " + client.getName() + "\n"; // formatta la lista dei contatti
+                }
+            }
+            contatti += "]";
 
-            MioThreadServer thread = cl.get(i);
-            if (thread.getName().equals(nomeThread))
-            {
-                cl.remove(i);
+            return contatti;
+        }
+    }
+
+    /**
+     * Rimuove un client dalla lista dei client.
+     * @param name il nome del client da rimuovere
+     */
+    public void removeClient(String name) {
+        for (MioThreadServer client : cl) {
+            if (client.getName().equals(name)) { // verifica se il client corrente è quello da rimuovere
+                cl.remove(client); // rimuove il client dalla lista dei client
                 break;
             }
         }
